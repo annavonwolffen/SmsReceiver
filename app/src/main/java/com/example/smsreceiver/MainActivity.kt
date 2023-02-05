@@ -1,7 +1,6 @@
 package com.example.smsreceiver
 
 import android.Manifest.permission.RECEIVE_SMS
-import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -20,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // registerReceiver()
+                registerReceiver()
             } else {
                 Toast.makeText(applicationContext, "Sms cannot be received!", LENGTH_SHORT).show()
             }
@@ -32,28 +31,23 @@ class MainActivity : AppCompatActivity() {
         smsCodeView = findViewById(R.id.sms_code)
 
         if (ContextCompat.checkSelfPermission(applicationContext, RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED) {
-            // registerReceiver()
+            registerReceiver()
         } else {
             requestPermissionLauncher.launch(RECEIVE_SMS)
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        smsCodeView.text = intent?.getStringExtra("SMS_CODE")
-    }
-
     private fun registerReceiver() {
-        // smsReceiver = SmsBroadcastReceiver { smsCode ->
-        //     smsCodeView.text = smsCode
-        // }
-        // val intentFilter = IntentFilter("android.provider.Telephony.SMS_RECEIVED")
-        //
-        // registerReceiver(smsReceiver, intentFilter)
+        smsReceiver = SmsBroadcastReceiver { smsCode ->
+            smsCodeView.text = smsCode
+        }
+        val intentFilter = IntentFilter("android.provider.Telephony.SMS_RECEIVED")
+
+        registerReceiver(smsReceiver, intentFilter)
     }
 
     override fun onDestroy() {
-        // unregisterReceiver(smsReceiver)
+        unregisterReceiver(smsReceiver)
         super.onDestroy()
     }
 }
